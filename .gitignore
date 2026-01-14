@@ -1,6 +1,7 @@
 dataset/
 venv311/
 models/
+lfw_dataset/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
