@@ -14,9 +14,9 @@ class Config:
     CENTROIDS_FILE = os.path.join(MODELS_DIR, "centroids.pkl")
     
     # Настройки распознавания
-    DISTANCE_THRESHOLD = 0.55
+    DISTANCE_THRESHOLD = 0.6
     CAMERA_INDEX = 0
-    SCALE_FACTOR = 5.0
+    SCALE_FACTOR = 0.25
     
     # Настройки датасета
     LABELS = {
