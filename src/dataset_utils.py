@@ -163,3 +163,36 @@ class DatasetManager:
             print(f"  • {file} ({size_kb:.1f} KB)")
         
         return added
+
+    def get_upload_stats(self):
+        """Получить статистику папки uploads"""
+        from config import Config
+        
+        stats = {
+            "total_files": 0,
+            "image_files": 0,
+            "pending_files": [],
+            "processed_files": 0
+        }
+        
+        upload_dir = Config.UPLOADS_DIR
+        if os.path.exists(upload_dir):
+            # Файлы в основной папке
+            for file in os.listdir(upload_dir):
+                file_path = os.path.join(upload_dir, file)
+                if os.path.isfile(file_path):
+                    stats["total_files"] += 1
+                    ext = os.path.splitext(file)[1].lower()
+                    if ext in (".jpg", ".jpeg", ".png", ".bmp"):
+                        stats["image_files"] += 1
+                        stats["pending_files"].append(file)
+            
+            # Файлы в подпапке processed
+            processed_dir = os.path.join(upload_dir, "processed")
+            if os.path.exists(processed_dir):
+                for file in os.listdir(processed_dir):
+                    file_path = os.path.join(processed_dir, file)
+                    if os.path.isfile(file_path):
+                        stats["processed_files"] += 1
+        
+        return stats
