@@ -1,0 +1,9 @@
+face-recognition
+opencv-python
+numpy
+scikit-learn
+pickle-mixin
+Pillow
+customtkinter
+tkinterweb
+kagglehub
