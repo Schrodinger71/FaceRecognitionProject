@@ -45,7 +45,7 @@ class FaceRecognitionApp(ctk.CTk):
     
     def setup_ui(self):
         """Настройка пользовательского интерфейса"""
-        self.title("Система распознавания лиц - Александр и Егор")
+        self.title("Система распознавания лиц - Aleksander и Egor")
         self.geometry(self.config.WINDOW_SIZE)
         
         # Создаем вкладки
@@ -94,7 +94,7 @@ class FaceRecognitionApp(ctk.CTk):
         stats_frame.pack(fill="x", padx=10, pady=(0, 10))
         
         self.stats_labels = {}
-        for name in ["Александр", "Егор", "Неизвестный"]:
+        for name in ["Aleksander", "Egor", "Unknown"]:
             label = ctk.CTkLabel(stats_frame, text=f"{name}: 0")
             label.pack(side="left", padx=20)
             self.stats_labels[name] = label
@@ -228,12 +228,12 @@ class FaceRecognitionApp(ctk.CTk):
                     font=("Arial", 16, "bold")).pack(pady=20)
         
         # Кнопки захвата фото
-        ctk.CTkButton(right_frame, text="📸 Захватить фото Александра",
-                     command=lambda: self.capture_photos("Александр"),
+        ctk.CTkButton(right_frame, text="📸 Захватить фото Aleksanderа",
+                     command=lambda: self.capture_photos("Aleksander"),
                      height=40).pack(pady=5, padx=20, fill="x")
         
-        ctk.CTkButton(right_frame, text="📸 Захватить фото Егора",
-                     command=lambda: self.capture_photos("Егор"),
+        ctk.CTkButton(right_frame, text="📸 Захватить фото Egorа",
+                     command=lambda: self.capture_photos("Egor"),
                      height=40).pack(pady=5, padx=20, fill="x")
         
         ctk.CTkButton(right_frame, text="🎓 Обновить модель",
@@ -429,7 +429,7 @@ class FaceRecognitionApp(ctk.CTk):
     
     def process_video(self):
         """Обработка видео потока"""
-        recognition_count = {"Александр": 0, "Егор": 0, "Неизвестный": 0}
+        recognition_count = {"Aleksander": 0, "Egor": 0, "Unknown": 0}
         
         while self.is_running and self.cap:
             ret, frame = self.cap.read()

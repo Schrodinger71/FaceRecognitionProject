@@ -18,7 +18,7 @@ class DatasetManager:
         Захват фото с веб-камеры для указанного человека
         
         Args:
-            person_name: Имя человека (Александр или Егор)
+            person_name: Имя человека (Aleksander или Egor)
             num_photos: Количество фото для захвата
         
         Returns:
@@ -100,7 +100,7 @@ class DatasetManager:
     
     def add_lfw_dataset(self, lfw_path: str, max_per_person: int = 10) -> int:
         """
-        Добавление лиц из LFW датасета в папку 'Неизвестный'
+        Добавление лиц из LFW датасета в папку 'Unknown'
         
         Args:
             lfw_path: Путь к папке LFW
@@ -109,7 +109,7 @@ class DatasetManager:
         Returns:
             int: Количество добавленных фото
         """
-        unknown_dir = os.path.join(self.config.DATASET_DIR, "Неизвестный")
+        unknown_dir = os.path.join(self.config.DATASET_DIR, "Unknown")
         os.makedirs(unknown_dir, exist_ok=True)
         
         print(f"📂 Поиск лиц в: {lfw_path}")

@@ -16,13 +16,13 @@ class Config:
     # Настройки распознавания
     DISTANCE_THRESHOLD = 0.55
     CAMERA_INDEX = 0
-    SCALE_FACTOR = 0.3
+    SCALE_FACTOR = 5.0
     
     # Настройки датасета
     LABELS = {
-        0: "Александр",
-        1: "Егор",
-        -1: "Неизвестный"
+        0: "Aleksander",
+        1: "Egor",
+        -1: "Unknown"
     }
     
     # Настройки GUI
@@ -56,7 +56,7 @@ class Config:
         
         # Папки для людей
         for label in Config.LABELS.values():
-            if label != "Неизвестный":
+            if label != "Unknown":
                 person_dir = os.path.join(Config.DATASET_DIR, label)
                 os.makedirs(person_dir, exist_ok=True)
         

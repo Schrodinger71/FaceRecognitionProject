@@ -125,7 +125,7 @@ def main():
         return
     
     # 5. Добавляем датасет в проект
-    print("\n5. Добавление лиц в папку 'Неизвестный'...")
+    print("\n5. Добавление лиц в папку 'Unknown'...")
     try:
         manager = DatasetManager()
         # Добавляем только 10 фото от каждого человека (чтобы не перегружать)
@@ -149,9 +149,9 @@ def main():
         total = sum(stats.values())
         print(f"Всего фото: {total}")
         
-        # Проверяем наличие фото Александра
-        if stats.get("Александр", 0) < 10:
-            print("\n⚠️  ВНИМАНИЕ: У Александра меньше 10 фото!")
+        # Проверяем наличие фото Aleksanderа
+        if stats.get("Aleksander", 0) < 10:
+            print("\n⚠️  ВНИМАНИЕ: У Aleksanderа меньше 10 фото!")
             print("   Захватите фото через GUI или скрипт capture_photos.py")
         
     except Exception as e:

@@ -163,7 +163,7 @@ def main():
 
 def add_to_project_dataset(source_dir: str, max_to_add: int = 13000):
     """
-    Добавляет часть изображений в папку 'Неизвестный' проекта
+    Добавляет часть изображений в папку 'Unknown' проекта
     
     Args:
         source_dir: Папка с собранными изображениями
@@ -171,8 +171,8 @@ def add_to_project_dataset(source_dir: str, max_to_add: int = 13000):
     """
     print("\n➕ ДОБАВЛЕНИЕ В ПРОЕКТ:")
     
-    # Папка 'Неизвестный' в проекте
-    unknown_dir = os.path.join("dataset", "Неизвестный")
+    # Папка 'Unknown' в проекте
+    unknown_dir = os.path.join("dataset", "Unknown")
     os.makedirs(unknown_dir, exist_ok=True)
     
     # Получаем список изображений

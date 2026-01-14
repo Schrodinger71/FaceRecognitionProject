@@ -32,11 +32,11 @@ class FaceTrainer:
                 continue
             
             # Определяем метку класса
-            if person_name == "Александр":
+            if person_name == "Aleksander":
                 label = 0
-            elif person_name == "Егор":
+            elif person_name == "Egor":
                 label = 1
-            elif person_name == "Неизвестный":
+            elif person_name == "Unknown":
                 label = -1
             else:
                 label = -1  # Другие папки тоже считаем неизвестными
