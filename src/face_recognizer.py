@@ -168,6 +168,13 @@ class FaceRecognizer:
             name = result['name']
             confidence = result['confidence']
             
+            # Добавляем небольшой отступ для большей рамки
+            padding = 6
+            top = max(0, top - padding)
+            left = max(0, left - padding)
+            right = min(frame.shape[1], right + padding)
+            bottom = min(frame.shape[0], bottom + padding)
+            
             if name == "Aleksander":
                 color = (0, 255, 0)  # Зеленый
             elif name == "Egor":
@@ -177,8 +184,8 @@ class FaceRecognizer:
             else:
                 color = (0, 255, 255)  # Желтый
             
-            cv2.rectangle(frame, (left, top), (right, bottom), color, 2)
-            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), color, cv2.FILLED)
+            cv2.rectangle(frame, (left, top), (right, bottom), color, 1)
+            cv2.rectangle(frame, (left, bottom - 10), (right, bottom), color, cv2.FILLED)
             
             text = f"{name} ({confidence:.1%})"
             cv2.putText(frame, text, 
