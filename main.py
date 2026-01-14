@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Главный скрипт системы распознавания лиц
-Александр (person_0) и Егор (person_1)
+Распознавание Александра и Егора
 """
 
 import sys
@@ -16,7 +16,7 @@ from src.gui_app import FaceRecognitionApp
 def main():
     """Главная функция"""
     print("=" * 60)
-    print("Система распознавания лиц")
+    print("СИСТЕМА РАСПОЗНАВАНИЯ ЛИЦ")
     print("Цель: Распознавание Александра и Егора")
     print("=" * 60)
     
@@ -24,23 +24,38 @@ def main():
     Config.setup_directories()
     
     # Проверяем наличие датасета
+    print("\n📊 Статистика датасета:")
     dataset_stats = {}
+    
     for person in ["Александр", "Егор"]:
         person_dir = os.path.join(Config.DATASET_DIR, person)
         if os.path.exists(person_dir):
-            photos = [f for f in os.listdir(person_dir) if f.endswith(('.jpg', '.png', '.jpeg'))]
+            photos = [f for f in os.listdir(person_dir) 
+                     if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
             dataset_stats[person] = len(photos)
+            print(f"  {person}: {len(photos)} фото")
+        else:
+            dataset_stats[person] = 0
+            print(f"  {person}: 0 фото (папка не найдена)")
     
-    print("\nСтатистика датасета:")
-    for person, count in dataset_stats.items():
-        print(f"  {person}: {count} фото")
-    
+    # Предупреждение если фото мало
     if any(count < 10 for count in dataset_stats.values()):
-        print("\n⚠️  Внимание: рекомендуется иметь минимум 10 фото каждого человека!")
-        print("   Используйте опцию 'Захватить фото' в приложении")
+        print("\n⚠️  ВНИМАНИЕ: рекомендуется иметь минимум 10 фото каждого человека!")
+        print("   Используйте кнопку 'Захватить фото' в приложении")
+    
+    # Проверяем наличие моделей
+    models_exist = (
+        os.path.exists(Config.EMBEDDINGS_FILE) and
+        os.path.exists(Config.CENTROIDS_FILE)
+    )
+    
+    if not models_exist:
+        print("\n⚠️  Модель не обучена!")
+        print("   После захвата фото нажмите 'Обновить модель'")
+    
+    print("\n🚀 Запуск графического интерфейса...")
     
     # Запуск GUI
-    print("\nЗапуск графического интерфейса...")
     app = FaceRecognitionApp()
     app.protocol("WM_DELETE_WINDOW", app.on_closing)
     app.mainloop()

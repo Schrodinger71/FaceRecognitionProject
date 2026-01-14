@@ -8,7 +8,7 @@ class Config:
     UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
     RESULTS_DIR = os.path.join(BASE_DIR, "results")
     
-    # Настройки модели
+    # Файлы моделей
     EMBEDDINGS_FILE = os.path.join(MODELS_DIR, "embeddings.pkl")
     CLASSIFIER_FILE = os.path.join(MODELS_DIR, "classifier.pkl")
     CENTROIDS_FILE = os.path.join(MODELS_DIR, "centroids.pkl")
@@ -26,12 +26,15 @@ class Config:
     }
     
     # Настройки GUI
-    WINDOW_SIZE = "1400x800"
+    WINDOW_SIZE = "1200x700"
     THEME = "dark-blue"
     
-    # Поддерживаемые форматы файлов
-    IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif")
-    VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv")
+    # Поддерживаемые форматы
+    IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".bmp")
+    VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv")
+    
+    # Настройки автообработки
+    AUTO_PROCESS_INTERVAL = 5  # секунд
     
     @staticmethod
     def setup_directories():
@@ -46,12 +49,16 @@ class Config:
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
         
-        # Создаем подпапки для результатов
+        # Подпапки для результатов
         os.makedirs(os.path.join(Config.RESULTS_DIR, "images"), exist_ok=True)
         os.makedirs(os.path.join(Config.RESULTS_DIR, "videos"), exist_ok=True)
+        os.makedirs(os.path.join(Config.RESULTS_DIR, "reports"), exist_ok=True)
         
-        # Создаем папки для людей
+        # Папки для людей
         for label in Config.LABELS.values():
             if label != "Неизвестный":
                 person_dir = os.path.join(Config.DATASET_DIR, label)
                 os.makedirs(person_dir, exist_ok=True)
+        
+        # Папка для обработанных загрузок
+        os.makedirs(os.path.join(Config.UPLOADS_DIR, "processed"), exist_ok=True)
