@@ -122,7 +122,7 @@ if errorlevel 1 (
     pip install Pillow==10.0.0
     
     echo Устанавливаю customtkinter...
-    pip install customtkinter==5.2.0
+    pip install customtkinter
     
     echo Устанавливаю tkinterweb...
     pip install tkinterweb==3.2.1
