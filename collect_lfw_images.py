@@ -161,7 +161,7 @@ def main():
     print("2. Обучить модель на разнообразных лицах")
     print("=" * 60)
 
-def add_to_project_dataset(source_dir: str, max_to_add: int = 100):
+def add_to_project_dataset(source_dir: str, max_to_add: int = 13000):
     """
     Добавляет часть изображений в папку 'Неизвестный' проекта
     
