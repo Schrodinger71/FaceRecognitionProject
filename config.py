@@ -16,7 +16,7 @@ class Config:
     # Настройки распознавания
     DISTANCE_THRESHOLD = 0.55
     CAMERA_INDEX = 0
-    SCALE_FACTOR = 0.5
+    SCALE_FACTOR = 0.3
     
     # Настройки датасета
     LABELS = {

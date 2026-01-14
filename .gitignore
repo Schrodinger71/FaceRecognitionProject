@@ -1,5 +1,6 @@
 dataset/
 venv311/
+venv310/
 models/
 lfw_dataset/
 results/

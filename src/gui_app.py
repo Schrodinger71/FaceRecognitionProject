@@ -86,7 +86,7 @@ class FaceRecognitionApp(ctk.CTk):
         video_frame = ctk.CTkFrame(tab)
         video_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
         
-        self.video_label = ctk.CTkLabel(video_frame, text="Камера не запущена")
+        self.video_label = ctk.CTkLabel(video_frame, text="")
         self.video_label.pack(fill="both", expand=True, padx=10, pady=10)
         
         # Счетчики распознавания
@@ -397,7 +397,7 @@ class FaceRecognitionApp(ctk.CTk):
                 if self.recognizer is None:
                     raise RuntimeError("Модель не загружена")
             
-            self.cap = cv2.VideoCapture(self.config.CAMERA_INDEX)
+            self.cap = cv2.VideoCapture(self.config.CAMERA_INDEX, cv2.CAP_DSHOW)
             if not self.cap.isOpened():
                 raise RuntimeError("Не удалось открыть камеру")
             

@@ -27,7 +27,7 @@ class DatasetManager:
         person_dir = os.path.join(self.config.DATASET_DIR, person_name)
         os.makedirs(person_dir, exist_ok=True)
         
-        cap = cv2.VideoCapture(self.config.CAMERA_INDEX)
+        cap = cv2.VideoCapture(self.config.CAMERA_INDEX, cv2.CAP_DSHOW)
         if not cap.isOpened():
             raise RuntimeError("Не удалось открыть камеру")
         
