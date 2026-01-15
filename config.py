@@ -16,7 +16,14 @@ class Config:
     # Настройки распознавания
     DISTANCE_THRESHOLD = 0.6
     CAMERA_INDEX = 0
-    SCALE_FACTOR = 0.25
+    SCALE_FACTOR = 0.25  # Используется для уменьшения разрешения при обработке
+    
+    # Настройки производительности
+    PROCESS_EVERY_N_FRAMES = 3  # Обрабатывать каждый N-й кадр (для пропуска кадров)
+    CAMERA_WIDTH = 640  # Ширина камеры (меньше = быстрее)
+    CAMERA_HEIGHT = 480  # Высота камеры
+    CACHE_RESULTS_FRAMES = 5  # Кэшировать результаты на N кадров
+    GUI_UPDATE_INTERVAL = 0.033  # Интервал обновления GUI (30 FPS)
     
     # Настройки датасета
     LABELS = {

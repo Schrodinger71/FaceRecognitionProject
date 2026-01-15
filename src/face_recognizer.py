@@ -61,36 +61,48 @@ class FaceRecognizer:
             self.centroids = None
             self.classifier = None
     
-    def detect_faces_opencv(self, frame: np.ndarray) -> List[Tuple[int, int, int, int]]:
-        """Детекция лиц с использованием OpenCV"""
+    def detect_faces_opencv(self, frame: np.ndarray, scale_factor: float = 1.0) -> List[Tuple[int, int, int, int]]:
+        """Детекция лиц с использованием OpenCV (оптимизированная версия)"""
         if self.face_cascade is None:
             return []
         
-        # Конвертируем в grayscale
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # Уменьшаем разрешение для быстрой детекции
+        if scale_factor != 1.0:
+            small_frame = cv2.resize(frame, (0, 0), fx=scale_factor, fy=scale_factor)
+        else:
+            small_frame = frame
         
-        # Детекция лиц
+        # Конвертируем в grayscale
+        gray = cv2.cvtColor(small_frame, cv2.COLOR_BGR2GRAY)
+        
+        # Оптимизированные параметры для скорости (меньше точность, но быстрее)
         faces = self.face_cascade.detectMultiScale(
             gray,
-            scaleFactor=1.1,
-            minNeighbors=5,
-            minSize=(30, 30)
+            scaleFactor=1.2,  # Увеличено для скорости
+            minNeighbors=3,   # Уменьшено для скорости
+            minSize=(20, 20), # Уменьшено для скорости
+            flags=cv2.CASCADE_SCALE_IMAGE
         )
         
-        # Конвертируем формат (x, y, w, h) в (top, right, bottom, left)
+        # Конвертируем формат (x, y, w, h) в (top, right, bottom, left) и масштабируем обратно
         face_locations = []
         for (x, y, w, h) in faces:
-            top = y
-            right = x + w
-            bottom = y + h
-            left = x
+            # Масштабируем координаты обратно к исходному размеру
+            top = int(y / scale_factor)
+            right = int((x + w) / scale_factor)
+            bottom = int((y + h) / scale_factor)
+            left = int(x / scale_factor)
             face_locations.append((top, right, bottom, left))
         
         return face_locations
     
-    def recognize_faces(self, frame: np.ndarray) -> Tuple[np.ndarray, List[Dict[str, Any]]]:
+    def recognize_faces(self, frame: np.ndarray, use_scale: bool = True) -> Tuple[np.ndarray, List[Dict[str, Any]]]:
         """
-        Распознавание лиц на кадре с использованием OpenCV для детекции
+        Распознавание лиц на кадре с использованием OpenCV для детекции (оптимизированная версия)
+        
+        Args:
+            frame: Кадр для обработки
+            use_scale: Использовать ли уменьшение разрешения для ускорения
         """
         if self.centroids is None:
             return frame, []
@@ -99,22 +111,45 @@ class FaceRecognizer:
         if frame is None or frame.size == 0:
             return frame, []
         
-        # Детекция лиц с OpenCV
-        face_locations = self.detect_faces_opencv(frame)
+        # Определяем масштаб для обработки
+        scale_factor = self.config.SCALE_FACTOR if use_scale else 1.0
+        
+        # Детекция лиц с OpenCV на уменьшенном разрешении
+        face_locations = self.detect_faces_opencv(frame, scale_factor=scale_factor)
         
         if not face_locations:
             return frame, []
         
+        # Для извлечения эмбеддингов используем уменьшенное разрешение для скорости
+        if use_scale and scale_factor < 1.0:
+            small_frame = cv2.resize(frame, (0, 0), fx=scale_factor, fy=scale_factor)
+            # Масштабируем координаты лиц для уменьшенного кадра
+            scaled_locations = []
+            for (top, right, bottom, left) in face_locations:
+                scaled_locations.append((
+                    int(top * scale_factor),
+                    int(right * scale_factor),
+                    int(bottom * scale_factor),
+                    int(left * scale_factor)
+                ))
+            processing_frame = small_frame
+            processing_locations = scaled_locations
+        else:
+            processing_frame = frame
+            processing_locations = face_locations
+        
         # Конвертация BGR -> RGB для face_recognition
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb_frame = cv2.cvtColor(processing_frame, cv2.COLOR_BGR2RGB)
         
         # Убеждаемся, что массив является непрерывным (contiguous) и имеет правильный dtype
         rgb_frame = np.ascontiguousarray(rgb_frame, dtype=np.uint8)
         
         # Извлечение эмбеддингов только для найденных лиц
+        # Используем num_jitters=0 для скорости (меньше точность, но быстрее)
         face_encodings = face_recognition.face_encodings(
             rgb_frame,
-            known_face_locations=face_locations
+            known_face_locations=processing_locations,
+            num_jitters=0  # Отключаем jitter для скорости
         )
         
         results: List[Dict[str, Any]] = []
@@ -185,11 +220,17 @@ class FaceRecognizer:
                 color = (0, 255, 255)  # Желтый
             
             cv2.rectangle(frame, (left, top), (right, bottom), color, 1)
-            cv2.rectangle(frame, (left, bottom - 10), (right, bottom), color, cv2.FILLED)
             
+            # Фоновая рамка для текста сверху
+            text_height = 20
+            text_top = max(0, top - text_height)
+            cv2.rectangle(frame, (left, text_top), (right, top), color, cv2.FILLED)
+            
+            # Текст сверху обнаруженного лица
             text = f"{name} ({confidence:.1%})"
+            text_y = text_top + text_height - 4  # Позиция текста с небольшим отступом от верха фона
             cv2.putText(frame, text, 
-                       (left + 6, bottom - 6),
+                       (left + 6, text_y),
                        cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 255, 255), 1)
         
         return frame

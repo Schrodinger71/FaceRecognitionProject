@@ -37,6 +37,11 @@ class FaceRecognitionApp(ctk.CTk):
         self.cap: Optional[cv2.VideoCapture] = None
         self.processed_files = queue.Queue()
         
+        # Переменные для оптимизации производительности
+        self.cached_results: List[Dict[str, Any]] = []
+        self.cached_frame_count = 0
+        self.frame_counter = 0
+        
         # Запускаем мониторинг папки uploads
         self.start_upload_monitor()
         
@@ -81,6 +86,10 @@ class FaceRecognitionApp(ctk.CTk):
         # Статус
         self.status_label = ctk.CTkLabel(control_frame, text="Статус: Остановлен")
         self.status_label.pack(side="left", padx=20)
+        
+        # FPS счетчик
+        self.fps_label = ctk.CTkLabel(control_frame, text="FPS: 0.0", text_color="yellow")
+        self.fps_label.pack(side="left", padx=20)
         
         # Видео окно
         video_frame = ctk.CTkFrame(tab)
@@ -401,10 +410,21 @@ class FaceRecognitionApp(ctk.CTk):
             if not self.cap.isOpened():
                 raise RuntimeError("Не удалось открыть камеру")
             
+            # Устанавливаем меньшее разрешение для скорости
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.CAMERA_WIDTH)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.CAMERA_HEIGHT)
+            # Устанавливаем FPS (если поддерживается)
+            self.cap.set(cv2.CAP_PROP_FPS, 30)
+            
             self.is_running = True
             self.start_btn.configure(text="⏹️ Остановить камеру")
             self.status_label.configure(text="Статус: Запущена", text_color="green")
             self.log_message("Камера запущена")
+            
+            # Инициализируем кэш результатов
+            self.cached_results = []
+            self.cached_frame_count = 0
+            self.frame_counter = 0
             
             # Запускаем поток обработки видео
             self.video_thread = threading.Thread(target=self.process_video, daemon=True)
@@ -428,50 +448,89 @@ class FaceRecognitionApp(ctk.CTk):
         self.log_message("Камера остановлена")
     
     def process_video(self):
-        """Обработка видео потока"""
+        """Обработка видео потока (оптимизированная версия)"""
         recognition_count = {"Aleksander": 0, "Egor": 0, "Unknown": 0}
+        last_update_time = time.time()
+        fps_start_time = time.time()
+        fps_frame_count = 0
         
         while self.is_running and self.cap:
             ret, frame = self.cap.read()
             if not ret:
                 break
             
-            # Распознавание лиц
-            processed_frame, results = self.recognizer.recognize_faces(frame)
+            self.frame_counter += 1
+            fps_frame_count += 1
             
-            # Обновляем счетчики
-            for result in results:
-                name = result['name']
-                if name in recognition_count:
-                    recognition_count[name] += 1
+            # Пропускаем кадры для ускорения (обрабатываем каждый N-й кадр)
+            process_frame = (self.frame_counter % self.config.PROCESS_EVERY_N_FRAMES == 0)
+            
+            if process_frame:
+                # Распознавание лиц (с уменьшенным разрешением)
+                processed_frame, results = self.recognizer.recognize_faces(frame, use_scale=True)
+                
+                # Обновляем кэш результатов
+                self.cached_results = results
+                self.cached_frame_count = 0
+                
+                # Обновляем счетчики
+                for result in results:
+                    name = result['name']
+                    if name in recognition_count:
+                        recognition_count[name] += 1
+            else:
+                # Используем кэшированные результаты
+                processed_frame = frame.copy()
+                if self.cached_results:
+                    results = self.cached_results
+                    self.cached_frame_count += 1
+                    # Если кэш устарел, очищаем его
+                    if self.cached_frame_count > self.config.CACHE_RESULTS_FRAMES:
+                        self.cached_results = []
+                else:
+                    results = []
             
             # Отрисовка результатов
-            processed_frame = self.recognizer.draw_results(processed_frame, results)
+            if results:
+                processed_frame = self.recognizer.draw_results(processed_frame, results)
             
-            # Конвертация для отображения
-            rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
-            pil_image = Image.fromarray(rgb_frame)
+            # Обновляем GUI только с определенной частотой для экономии ресурсов
+            current_time = time.time()
+            if current_time - last_update_time >= self.config.GUI_UPDATE_INTERVAL:
+                # Вычисляем FPS
+                fps_elapsed = current_time - fps_start_time
+                if fps_elapsed >= 1.0:  # Обновляем FPS раз в секунду
+                    fps = fps_frame_count / fps_elapsed
+                    self.fps_label.configure(text=f"FPS: {fps:.1f}")
+                    fps_frame_count = 0
+                    fps_start_time = current_time
+                
+                # Конвертация для отображения
+                rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
+                pil_image = Image.fromarray(rgb_frame)
+                
+                # Изменение размера под окно
+                window_width = self.video_label.winfo_width()
+                window_height = self.video_label.winfo_height()
+                
+                if window_width > 1 and window_height > 1:
+                    pil_image = pil_image.resize((window_width, window_height), Image.LANCZOS)
+                
+                tk_image = ImageTk.PhotoImage(pil_image)
+                
+                # Обновление изображения
+                self.video_label.configure(image=tk_image)
+                self.video_label.image = tk_image
+                
+                # Обновляем счетчики в GUI
+                for name, count in recognition_count.items():
+                    if name in self.stats_labels:
+                        self.stats_labels[name].configure(text=f"{name}: {count}")
+                
+                last_update_time = current_time
             
-            # Изменение размера под окно
-            window_width = self.video_label.winfo_width()
-            window_height = self.video_label.winfo_height()
-            
-            if window_width > 1 and window_height > 1:
-                pil_image = pil_image.resize((window_width, window_height), Image.LANCZOS)
-            
-            tk_image = ImageTk.PhotoImage(pil_image)
-            
-            # Обновление изображения
-            self.video_label.configure(image=tk_image)
-            self.video_label.image = tk_image
-            
-            # Обновляем счетчики в GUI
-            for name, count in recognition_count.items():
-                if name in self.stats_labels:
-                    self.stats_labels[name].configure(text=f"{name}: {count}")
-            
-            # Небольшая задержка
-            time.sleep(0.03)
+            # Минимальная задержка для освобождения CPU
+            time.sleep(0.001)
     
     def select_image(self):
         """Выбор изображения для обработки"""
