@@ -424,7 +424,7 @@ class FaceRecognitionApp(ctk.CTk):
             self.cap.release()
             self.cap = None
         
-        self.video_label.configure(text="Камера не запущена")
+        self.video_label.configure(text="")
         self.log_message("Камера остановлена")
     
     def process_video(self):

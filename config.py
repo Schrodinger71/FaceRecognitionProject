@@ -26,7 +26,7 @@ class Config:
     }
     
     # Настройки GUI
-    WINDOW_SIZE = "1200x700"
+    WINDOW_SIZE = "1300x800"
     THEME = "dark-blue"
     
     # Поддерживаемые форматы
