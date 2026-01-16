@@ -20,8 +20,8 @@ class Config:
     
     # Настройки производительности
     PROCESS_EVERY_N_FRAMES = 3  # Обрабатывать каждый N-й кадр (для пропуска кадров)
-    CAMERA_WIDTH = 640  # Ширина камеры (меньше = быстрее)
-    CAMERA_HEIGHT = 480  # Высота камеры
+    CAMERA_WIDTH = 580  # Ширина камеры (меньше = быстрее)
+    CAMERA_HEIGHT = 580  # Высота камеры
     CACHE_RESULTS_FRAMES = 5  # Кэшировать результаты на N кадров
     GUI_UPDATE_INTERVAL = 0.033  # Интервал обновления GUI (30 FPS)
     
